@@ -15,7 +15,7 @@
   <div class="container">
     <div class="header">
       <span>Cadastro de Coleta</span>
-      <button onclick="openModal()" id="new">Cadastrar</i></button>
+      <button id="new-item">Cadastrar</i></button>
     </div>
 
     <div class="divTable">
@@ -29,14 +29,14 @@
             <th class="acao">Ações</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="tableBody">
         </tbody>
       </table>
     </div>
 
-    <div class="modal-container">
+    <div id="add-modal" class="modal-container">
       <div class="modal">
-        <form>
+        <form id="addItemForm">
           <label for="m-nome">Nome</label>
           <input id="name" type="text" required />
   
@@ -52,12 +52,12 @@
             <option value="Coletado">Coletado</option>
           </select>
 
-          <button id="btnSalvar">Salvar</button>
+          <button id="btnSalvar" type="submit">Salvar</button>
         </form>
       </div>
     </div>
 
-    <div class="modal-tasks-container">
+    <div id="task-modal" class="modal-tasks-container">
       <div class="modal-tasks">
         <form>
           <label for="m-task">Tarefa</label>
