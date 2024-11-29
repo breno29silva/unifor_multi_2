@@ -1,116 +1,178 @@
+Parse.serverURL = 'https://parseapi.back4app.com';
 
+Parse.initialize(
+  'JqdbNDMER1nviBYat4yVAtuFFrxt4dJesUyn3xe0',
+  'zp7JhXCj3EkUT3JzCVsPcDwjKlqwIufAud2qLJPM'
+);
 
-const listItems = []
+const modal = document.querySelector('.modal-container')
+const modalTask = document.querySelector('.modal-tasks-container')
+const tbody = document.querySelector('tbody')
+const userName = document.querySelector('#name')
+const userProduct = document.querySelector('#product')
+const userLastName = document.querySelector('#lastName')
+const userStatus = document.querySelector('#status')
+const btnSalvar = document.querySelector('#btnSalvar')
+const btnAdd = document.querySelector('#btnAdd')
 
-// Get references to the button and modal elements
-const addItemButton = document.getElementById("new-item");
-const saveItemButton = document.getElementById("btnSalvar");
-const addTaskButton = document.getElementById("btnSalvar");
+let itens
+let id
 
-const addItemForm = document.getElementById('addItemForm')
+function openModal(edit = false, index = 0) {
+  modal.classList.add('active')
 
-const addModal = document.getElementById("add-modal");
-const taskmodal = document.getElementById("task-modal");
-
-
-// When the open modal button is clicked, show the modal
-addItemButton.addEventListener("click", ()  => {
-    addModal.style.display = "flex"; 
-});
-
-
-// When the add button is clicked, add task and hide the modal
-addTaskButton.addEventListener("click", () => {
-    taskmodal.style.display = "none"; 
-});
-
-// Optionally, close the modal if the user clicks outside of the modal content
-window.addEventListener("click", (event) => {
-    if (event.target === addModal) {
-        addModal.style.display = "none"; 
+  modal.onclick = e => {
+    if (e.target.className.indexOf('modal-container') !== -1) {
+      modal.classList.remove('active')
     }
-    if (event.target === taskmodal) {
-        taskmodal.style.display = "none"; 
-    }
-});
+  }
 
-
-addItemForm.addEventListener("submit", (event) =>{
-    event.preventDefault(); 
-
-    // Get values from the form inputs
-    const nome = document.getElementById('name').value;
-    const sobrenome = document.getElementById('lastName').value;
-    const produto = document.getElementById('product').value;
-    const status = document.getElementById('status').value;
-
-    // Create a new item object
-    const newItem = { nome, sobrenome, produto, status };
-
-    // Add the new item to the array
-    listItems.push(newItem);
-
-    // When the save button is clicked, hide the modal
-    addModal.style.display = "none"; 
-
-    // Re-render the table to show the new item
-    renderTable();
-
-    // Clear the form inputs after submission
-    document.getElementById('addItemForm').reset();
-})
-
-// Function to delete an item from the list
-const deleteItem = (itemToDelete) => {
-    const index = listItems.findIndex(item => item === itemToDelete);
-    if (index !== -1) {
-        listItems.splice(index, 1); // Remove the item from the array
-        renderTable(); // Re-render the table after deletion
-    }
+  if (edit) {
+    userName.value = itens[index].name
+    userLastName.value = itens[index].lastName
+    userProduct.value = itens[index].product
+    userStatus.value = itens[index].status
+    id = index  
+  } else {
+      userName.value = ''
+      userLastName.value = ''
+      userProduct.value = ''
+  }
 }
 
-// Function to render the table rows
-const renderTable = () => {
-    const tableBody = document.getElementById('tableBody');
-    tableBody.innerHTML = "";
+function openTaskModal(index = 0) {
+  modalTask.classList.add('active')
 
-    listItems.forEach(item => {
-        const row = document.createElement('tr');
-        
-        const nomeCell = document.createElement('td');
-        nomeCell.textContent = item.nome;
-        row.appendChild(nomeCell);
-        
-        const sobrenomeCell = document.createElement('td');
-        sobrenomeCell.textContent = item.sobrenome;
-        row.appendChild(sobrenomeCell);
-        
-        const produtoCell = document.createElement('td');
-        produtoCell.textContent = item.produto;
-        row.appendChild(produtoCell);
-        
-        const statusCell = document.createElement('td');
-        statusCell.textContent = item.status;
-        row.appendChild(statusCell);
-        
-        const acaoCell = document.createElement('td');
-        
+  modalTask.onclick = e => {
+    if (e.target.className.indexOf('modal-tasks-container') !== -1) {
+      modalTask.classList.remove('active')
+    }
+  }
 
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = "Excluir";
-        deleteButton.className = "delete-action";
-        deleteButton.onclick = function() {
-            if (confirm('Tem certeza que deseja excluir este item?')) {
-                deleteItem(item);
-            }
-        };
-
-        acaoCell.appendChild(deleteButton);
-        row.appendChild(acaoCell);
-        
-        // Append the row to the table body
-        tableBody.appendChild(row);
-    });
+  id = index
 }
 
-renderTable()
+function editItem(index) {
+  openModal(true, index)
+}
+
+function deleteItem(index) {
+  remove(itens[index].id)
+}
+
+async function insertItem(item, index) {
+  let tr = document.createElement('tr')
+
+  tr.innerHTML = `
+    <td>${item.name}</td>
+    <td>${item.lastName}</td>
+    <td>${item.product}</td>
+    <td>${item.status}</td>
+    <td class="acao">
+      <button onclick="editItem(${index})"><i class='bx bx-edit' ></i></button>
+      <button onclick="deleteItem(${index})"><i class='bx bx-trash'></i></button>
+    </td>
+  `
+  tbody.appendChild(tr)
+}
+
+btnAdd.onclick = e => {
+
+  e.preventDefault();
+
+  modalTask.classList.remove('active')
+  id = undefined;  
+}
+
+btnSalvar.onclick = e => {
+  if (userName.value == '' || userLastName.value == '') {
+    return
+  }
+
+  e.preventDefault();
+
+  if (id !== undefined) {
+    console.log('!undefined');
+    console.log('ID', itens[id].id);
+    itens[id].name = userName.value
+    itens[id].lastName = userLastName.value
+    itens[id].product = userProduct.value
+    itens[id].status = userStatus.value;
+    update(itens[id].id)
+  } else {
+    inserir()    
+  }
+  
+
+  modal.classList.remove('active')
+  id = undefined  
+}
+
+const lista = async () => {
+  const coleta = Parse.Object.extend('Coleta');
+  const query = new Parse.Query(coleta);
+
+  try {
+    const results = await query.find();
+    tbody.innerHTML = ''
+    itens = []
+    results.forEach((item, index) => {      
+      itens.push({ 'id': item.id, 'name': item.attributes.name, 'lastName': item.attributes.lastName, 'product': item.attributes.product, 'status': [], 'status': item.attributes.status});
+      insertItem(item.attributes, index)      
+    })
+  } catch (error) {
+    console.error('Error while fetching Tarefa', error);
+  }
+};
+
+const inserir = async () => {
+  const myNewObject = new Parse.Object('Coleta');
+
+  myNewObject.set('name', userName.value);
+  myNewObject.set('lastName', userLastName.value);
+  myNewObject.set('product', userProduct.value);
+  myNewObject.set('status', userStatus.value);
+
+  console.log('Tarefa created', itens);
+
+  try {
+    const result = await myNewObject.save();
+    console.log('Tarefa created', result);
+    lista();
+  } catch (error) {
+    console.error('Error while creating Tarefa: ', error);
+  }
+};
+
+async function remove(id) {
+  const query = new Parse.Query('Coleta');
+  console.log('id', id);
+  try {
+    const response = await query.get(id);
+    await response.destroy()
+    console.log('Delet ParseObject', response);
+    lista();
+  } catch (error) {
+    console.error('Error while updating Tarefa', error);
+  }
+};
+
+async function update(id) {
+  const query = new Parse.Query("Coleta");
+  
+  try {
+    const data = await query.get(id);
+    data.set('name', userName.value);
+    data.set('lastName', userLastName.value);
+    data.set('product', userProduct.value);
+    data.set('status', userStatus.value);
+
+    await data.save();
+    console.log("Object updated successfully!");
+    lista()
+  } catch (error) {
+    console.error("Error updating object: " + error.message);
+  }
+}
+
+lista()
